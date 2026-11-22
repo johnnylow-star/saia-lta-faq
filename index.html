@@ -3,7 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>:root{padding-top:env(safe-area-inset-top,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<style>:root{padding-top:env(safe-area-inset-top,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}.assoc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:12px}
+.assoc label{display:block;font-family:var(--display);font-weight:600;font-size:14px;color:var(--navy);margin-bottom:6px}
+.assoc select,.tsel{width:100%;font:inherit;font-size:15px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.tsel{width:auto;max-width:100%;font-size:14px;padding:8px 10px;flex:1 1 220px}
+.assoc select:focus-visible,.tsel:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.need{outline:3px solid var(--gold)!important;outline-offset:2px}
+.needmsg{width:100%;font-size:13px;font-weight:700;color:#B45309}
+</style>
 <title>Land Transport Pain Points Guide</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Nunito+Sans:wght@400;600;700&display=swap">
@@ -114,6 +121,16 @@ html:not(.js) .jsonly,html:not(.js) .tipjs,html:not(.js) .pick,html:not(.js) .co
     <div><b>3 · Paste it</b>Do this for your 2 biggest problems in the toolkit.</div>
   </div>
   <div class="how tipjs" style="grid-template-columns:1fr"><div><b>Tip</b>Tap <b style="display:inline;color:var(--ok)">Use this</b> on your 2 questions. They stay saved in the bar at the bottom, so you can copy one, paste it in the toolkit, then come back here for the other.</div></div>
+  <div class="assoc jsonly"><label for="assoc">Which association are you from?</label>
+  <select id="assoc" data-assoc><option value="">Choose your association</option>
+<option value="lta-eeba">Express &amp; Excursion Bus Association (EEBA)</option>
+<option value="lta-scmta">Singapore Cycle and Motor Trade Association (SCMTA)</option>
+<option value="lta-smcta">Singapore Motor Cycle Trade Association (SMCTA)</option>
+<option value="lta-smtda">Singapore Motor Tyre Dealers Association (SMTDA)</option>
+<option value="lta-smwa">Singapore Motor Workshop Association (SMWA)</option>
+<option value="lta-ssphboa">Singapore School &amp; Private Hire Bus Owners Association (SSPHBOA)</option>
+<option value="lta-sta">Singapore Transport Association (STA)</option>
+<option value="lta">Other / not sure</option></select></div>
 </header>
 
 <div class="bar jsonly">
@@ -312,6 +329,16 @@ html:not(.js) .jsonly,html:not(.js) .tipjs,html:not(.js) .pick,html:not(.js) .co
   <button class="thead" type="button" id="thead" aria-expanded="false"><span class="dots" id="dots"><i></i><i></i></span><b id="tcount">My pain points: 0 of 2</b><span class="tog" id="tog">Show</span></button>
   <div class="slots" id="slots"></div>
   <div class="tfoot"><small id="thint">Pick 2 questions with <b>Use this</b>. Then one tap copies Problem 1 and opens the toolkit.</small>
+  <select class="tsel" data-assoc aria-label="Your association"><option value="">Choose your association</option>
+<option value="lta-eeba">Express &amp; Excursion Bus Association (EEBA)</option>
+<option value="lta-scmta">Singapore Cycle and Motor Trade Association (SCMTA)</option>
+<option value="lta-smcta">Singapore Motor Cycle Trade Association (SMCTA)</option>
+<option value="lta-smtda">Singapore Motor Tyre Dealers Association (SMTDA)</option>
+<option value="lta-smwa">Singapore Motor Workshop Association (SMWA)</option>
+<option value="lta-ssphboa">Singapore School &amp; Private Hire Bus Owners Association (SSPHBOA)</option>
+<option value="lta-sta">Singapore Transport Association (STA)</option>
+<option value="lta">Other / not sure</option></select>
+  <span class="needmsg" id="needmsg" hidden>Please choose your association first (or “Other / not sure”).</span>
   <a class="btn" id="go" href="https://aitoolkit.saia.org.sg/?ref=lta" target="_blank" rel="noopener">Open the toolkit →</a>
   <button class="btn" id="go2" type="button" hidden>Copy Problem 2</button></div>
  </div>
@@ -425,11 +452,21 @@ renderTray(); setOpen(picks.length > 0);
 <script>
 (function(){
   var ok=["lta","lta-eeba","lta-scmta","lta-smcta","lta-smwa","lta-smtda","lta-ssphboa","lta-sta"];
-  var ref="lta";
+  var ref="";
   try{var r=(new URLSearchParams(location.search).get("ref")||"").toLowerCase();
-    if(ok.indexOf(r)>=0){ref=r;try{localStorage.setItem("saia-lta-ref",r)}catch(e){}}
+    if(r!=="lta"&&ok.indexOf(r)>=0){ref=r;}
     else{var k=localStorage.getItem("saia-lta-ref");if(ok.indexOf(k)>=0)ref=k;}}catch(e){}
-  var go=document.getElementById("go"); if(go) go.href="https://aitoolkit.saia.org.sg/?ref="+ref;
+  var sels=[].slice.call(document.querySelectorAll("[data-assoc]")), go=document.getElementById("go"), msg=document.getElementById("needmsg");
+  function apply(v){ref=v;sels.forEach(function(x){x.value=v;x.classList.remove("need")});if(msg)msg.hidden=true;
+    if(go)go.href="https://aitoolkit.saia.org.sg/?ref="+(v||"lta");
+    try{if(v)localStorage.setItem("saia-lta-ref",v)}catch(e){}}
+  sels.forEach(function(x){x.addEventListener("change",function(){apply(x.value)})});
+  apply(ref);
+  document.addEventListener("click",function(e){
+    if(!ref&&e.target.closest&&e.target.closest("#go")){
+      e.preventDefault();e.stopImmediatePropagation();
+      if(msg)msg.hidden=false;var t=document.querySelector(".tsel");if(t){t.classList.add("need");t.focus();}
+    }},true);
 })();
 </script>
 </body>
