@@ -422,5 +422,15 @@ renderTray = function () { _render(); if (picks.length < 2 && step) setStep(0); 
 renderTray(); setOpen(picks.length > 0);
 </script>
 
+<script>
+(function(){
+  var ok=["lta","lta-eeba","lta-scmta","lta-smcta","lta-smwa","lta-smtda","lta-ssphboa","lta-sta"];
+  var ref="lta";
+  try{var r=(new URLSearchParams(location.search).get("ref")||"").toLowerCase();
+    if(ok.indexOf(r)>=0){ref=r;try{localStorage.setItem("saia-lta-ref",r)}catch(e){}}
+    else{var k=localStorage.getItem("saia-lta-ref");if(ok.indexOf(k)>=0)ref=k;}}catch(e){}
+  var go=document.getElementById("go"); if(go) go.href="https://aitoolkit.saia.org.sg/?ref="+ref;
+})();
+</script>
 </body>
 </html>
